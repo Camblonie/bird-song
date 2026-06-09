@@ -4,6 +4,21 @@
 <dict>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Bird Song needs microphone access to listen for and identify bird calls in your surroundings.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your location helps BirdNET narrow down which species are likely in your area.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>localhost</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

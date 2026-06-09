@@ -39,8 +39,13 @@ final class BirdClassifier: ObservableObject {
     static let confidenceThreshold: Double = 0.70
     /// How many seconds a card remains visible after the last detection
     static let debounceSeconds: Double = 5.0
-    /// Toggle — set true once BirdNET.mlmodel is added to the project
-    private static let USE_REAL_MODEL = false
+
+    /// Inference mode selection:
+    ///   .mock   — random birds, no audio analysis (default)
+    ///   .api    — BirdNET-Analyzer REST server (set serverURL in BirdNETAPIService)
+    ///   .coreML — on-device CoreML model (requires BirdNET.mlpackage in bundle)
+    enum InferenceMode { case mock, api, coreML }
+    private static let inferenceMode: InferenceMode = .api
 
     // MARK: - Published State
 
@@ -57,10 +62,10 @@ final class BirdClassifier: ObservableObject {
 
     /// Process one 3-second PCM buffer and update activeDetections.
     func classifyBuffer(_ buffer: AVAudioPCMBuffer) {
-        if Self.USE_REAL_MODEL {
-            runCoreMLInference(buffer)
-        } else {
-            runMockInference()
+        switch Self.inferenceMode {
+        case .mock:   runMockInference()
+        case .api:    runAPIInference(buffer)
+        case .coreML: runCoreMLInference(buffer)
         }
     }
 
@@ -91,6 +96,33 @@ final class BirdClassifier: ObservableObject {
             (catalog[idx2], Double.random(in: 0.71...0.95)),
         ]
         applyResults(fakeResults)
+    }
+
+    // MARK: - API Inference
+
+    /// Send buffer to the BirdNET-Analyzer REST server and apply results.
+    private func runAPIInference(_ buffer: AVAudioPCMBuffer) {
+        BirdNETAPIService.analyze(buffer: buffer) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let apiResults):
+                // Convert BirdNETResult labels → (Bird, confidence) pairs
+                // BirdNET label format: "Turdus migratorius_American Robin"
+                // BirdCatalog.birdNETLabel format: "American Robin_Turdus migratorius"
+                // We match by checking if the catalog label's words appear in the server label.
+                let matched: [(bird: Bird, confidence: Double)] = apiResults.compactMap { r in
+                    guard r.confidence >= Self.confidenceThreshold else { return nil }
+                    guard let bird = BirdCatalog.bird(forAPILabel: r.label) else { return nil }
+                    return (bird: bird, confidence: r.confidence)
+                }
+                self.applyResults(matched)
+
+            case .failure(let error):
+                print("[BirdClassifier] API error: \(error.localizedDescription)")
+                // Fall back to mock so the UI stays active during development
+                self.runMockInference()
+            }
+        }
     }
 
     // MARK: - CoreML Inference

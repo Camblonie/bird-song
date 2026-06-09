@@ -46,3 +46,11 @@ Thumbs.db
 # Sensitive / secrets
 *.env
 Secrets.swift
+
+# BirdNET model files (too large for git — download separately)
+scripts/birdnet_model/
+scripts/BirdNET_v2.4_tflite.zip
+scripts/_birdnet_audio.onnx
+scripts/_tmp_savedmodel/
+Bird Song/BirdNET.mlpackage
+Bird Song/BirdNET_Labels.json

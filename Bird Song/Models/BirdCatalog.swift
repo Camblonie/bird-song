@@ -535,9 +535,20 @@ enum BirdCatalog {
              description: "Smallest North American falcon. Hovers over fields hunting insects and small prey."),
     ]
 
-    /// Look up a Bird by its BirdNET label string.
+    /// Look up a Bird by its BirdNET label string (catalog format: "CommonName_ScientificName").
     static func bird(forLabel label: String) -> Bird? {
         all.first { $0.birdNETLabel == label }
+    }
+
+    /// Look up a Bird by a BirdNET server API label (server format: "ScientificName_CommonName").
+    /// The server swaps the order vs the catalog — we match on scientific name for robustness.
+    static func bird(forAPILabel apiLabel: String) -> Bird? {
+        // apiLabel example: "Turdus migratorius_American Robin"
+        // Split on "_" — first part is scientific name
+        let parts = apiLabel.split(separator: "_", maxSplits: 1).map(String.init)
+        guard parts.count == 2 else { return nil }
+        let scientificName = parts[0].trimmingCharacters(in: .whitespaces)
+        return all.first { $0.scientificName.lowercased() == scientificName.lowercased() }
     }
 
     /// BirdNET label strings as a Set for fast membership testing.
