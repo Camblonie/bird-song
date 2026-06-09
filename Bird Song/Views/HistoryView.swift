@@ -54,7 +54,7 @@ struct HistoryView: View {
                 .foregroundStyle(.secondary)
             Text("No Sightings Yet")
                 .font(.title3.bold())
-            Text("Tap the Mic tab and start listening.\nTap "Log This" on any detected bird to save it here.")
+            Text("Tap the Mic tab and start listening.\nTap \"Log This\" on any detected bird to save it here.")
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
