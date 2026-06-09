@@ -1,0 +1,21 @@
+{
+  "images": [
+    {
+      "idiom": "universal",
+      "filename": "bird_pied_billed_grebe.png",
+      "scale": "1x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}
